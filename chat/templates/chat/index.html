@@ -1,15 +1,20 @@
-<!-- chat/templates/chat/index.html -->
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8"/>
-    <title>Chat Rooms</title>
-</head>
-<body>
-    What chat room would you like to enter?<br>
-    <input id="room-name-input" type="text" size="100"><br>
-    <input id="room-name-submit" type="button" value="Enter">
-
+{% extends 'chat/base.html' %}
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <h1>Chat Rooms Demonstration</h1>
+        </div>
+    </div>
+    <br>
+    <div class="row">
+        <div class="col-md-12">
+            What chat room would you like to enter?<br>
+            <input id="room-name-input" type="text" size="100"><br>
+            <input id="room-name-submit" type="button" value="Enter">
+        </div>
+    </div>
+</div>
     <script>
         document.querySelector('#room-name-input').focus();
         document.querySelector('#room-name-input').onkeyup = function(e) {
@@ -23,5 +28,4 @@
             window.location.pathname = '/chat/' + roomName + '/';
         };
     </script>
-</body>
-</html>
+{% endblock %}
