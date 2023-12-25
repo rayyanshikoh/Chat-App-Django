@@ -11,54 +11,178 @@
     <link rel="stylesheet" href="{% static 'chat/styles.min.css' %}">
 </head>
 
-<body><div class="bootstrap_chat">
+<body>
+<div class="bootstrap_chat">
 <div class="container py-5 px-4">
   <!-- For demo purpose-->
   <header class="text-center">
-    <h1 class="display-4 text-white">Simple Bootstrap Chat</h1>
+    <h1 class="display-4 text-white" id="titleText">Simple Bootstrap Chat</h1>
   </header>
 
  
     <!-- Chat Box-->
     <div class="col-12 col-md-8 mx-auto px-0">
-      <div class="px-4 py-5 chat-box bg-white">
-        <!-- Sender Message-->
-        <div class="media w-50 mb-3 d-flex justify-content-start">
-          <div class="media-body">
-              <div class="bg-light rounded py-2 px-3 mb-2">
-                  <p class="text-small mb-0 text-muted">Test which is a new approach all solutions</p>
-              </div>
-              <p class="small text-muted">12:00 PM | Aug 13</p>
-          </div>
-        </div>
-
-        <!-- Reciever Message-->
-        <div class="ml-auto mb-3 d-flex justify-content-end">
-          <div class="media-body">
-              <div class="bg-primary rounded py-2 px-3 mb-2">
-                  <p class="text-small mb-0 text-white">Test which is a new approach to have all solutions</p>
-              </div>
-              <p class="small text-muted">12:00 PM | Aug 13</p>
-          </div>
-        </div>
-
+      <div class="px-4 py-5 chat-box bg-white" id="chatBox">
       </div>
 
       <!-- Typing area -->
-      <form action="#" class="bg-light">
+      <form class="bg-light">
         <div class="input-group">
-          <input type="text" placeholder="Type a message" aria-describedby="button-addon2" class="form-control rounded-0 border-0 py-4 bg-light">
+          <input type="text" placeholder="Type a message" id="chat-message-input" aria-describedby="button-addon2" class="form-control rounded-0 border-0 py-4 bg-light">
           <div class="input-group-append">
-            <button id="button-addon2" type="submit" class="btn btn-link"> <i class="fa fa-paper-plane"></i></button>
+            <button id="chat-message-submit" type="submit" class="btn btn-link"> <i class="fa fa-paper-plane"></i></button>
           </div>
+          <!-- <input id="chat-message-submit" type="button" value="Send"> -->
         </div>
       </form>
-
     </div>
   </div>
 </div>
 </div>
+    {{ room_name|json_script:"room-name" }}
+    {{ username|json_script:"username" }}
+
+
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      document.querySelector('form').addEventListener('submit', function(event) {
+          event.preventDefault();
+          // Your code to handle the form submission goes here
+      });
+      function createReceiverMessage(messageText, timestamp) {
+        // Create the receiver message div
+        let receiverMessage = document.createElement('div');
+        receiverMessage.setAttribute('class', 'ml-auto mb-3 d-flex justify-content-end');
+
+        // Create the media body
+        let mediaBody = document.createElement('div');
+        mediaBody.setAttribute('class', 'media-body');
+
+        // Create the inner div
+        let innerDiv = document.createElement('div');
+        innerDiv.setAttribute('class', 'bg-primary rounded py-2 px-3 mb-2');
+
+        // Create the paragraph
+        let paragraph = document.createElement('p');
+        paragraph.setAttribute('class', 'text-small mb-0 text-white');
+        paragraph.textContent = messageText; // use the messageText parameter
+
+        // Append the paragraph to the inner div
+        innerDiv.appendChild(paragraph);
+
+        // Create the time paragraph
+        let timeParagraph = document.createElement('p');
+        timeParagraph.setAttribute('class', 'small text-muted');
+        timeParagraph.textContent = "You | " + timestamp; // use the timestamp parameter
+
+        // Append the inner div and the time paragraph to the media body
+        mediaBody.appendChild(innerDiv);
+        mediaBody.appendChild(timeParagraph);
+
+        // Append the media body to the receiver message div
+        receiverMessage.appendChild(mediaBody);
+
+        // Return the receiver message div
+        return receiverMessage;
+      }
+
+      function createSenderMessage(messageText, timestamp, senderName) {
+        // Create the sender message div
+        let senderMessage = document.createElement('div');
+        senderMessage.setAttribute('class', 'media w-50 mb-3');
+
+        // Create the media body
+        let mediaBody = document.createElement('div');
+        mediaBody.setAttribute('class', 'media-body');
+
+        // Create the inner div
+        let innerDiv = document.createElement('div');
+        innerDiv.setAttribute('class', 'bg-light rounded py-2 px-3 mb-2');
+
+        // Create the paragraph
+        let paragraph = document.createElement('p');
+        paragraph.setAttribute('class', 'text-small mb-0 text-muted');
+        paragraph.textContent = messageText; // use the messageText parameter
+
+        // Append the paragraph to the inner div
+        innerDiv.appendChild(paragraph);
+
+        // Create the time paragraph
+        let timeParagraph = document.createElement('p');
+        timeParagraph.setAttribute('class', 'small text-muted');
+        timeParagraph.textContent = senderName + " | " + timestamp; // use the timestamp parameter
+
+        // Append the inner div and the time paragraph to the media body
+        mediaBody.appendChild(innerDiv);
+        mediaBody.appendChild(timeParagraph);
+
+        // Append the media body to the sender message div
+        senderMessage.appendChild(mediaBody);
+
+        // Return the sender message div
+        return senderMessage;
+      }
+
+      const roomName = JSON.parse(document.getElementById('room-name').textContent);
+      const username = JSON.parse(document.getElementById('username').textContent);
+
+      const titleText = document.querySelector('#titleText');
+      titleText.textContent = roomName;
+
+      const chatSocket = new WebSocket(
+        'ws://'
+        + window.location.host
+        + '/ws/chat/'
+        + roomName
+        + '/'
+        + username
+        + '/'
+      );
+
+      chatSocket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        // console.log('This was the username recieved');
+        // console.log(data.username);
+        if (data.username === username) {
+          // document.querySelector('#chat-log').value += ('You: ' + data.message + '\n');
+          let chatBox = document.querySelector('#chatBox');
+          let senderMessage = createReceiverMessage(data.message, data.time);
+          chatBox.appendChild(senderMessage);
+        } else {
+          // document.querySelector('#chat-log').value += (data.username + ': ' + data.message + '\n');
+          let chatBox = document.querySelector('#chatBox');
+          let receiverMessage = createSenderMessage(data.message, data.time, data.username);
+          chatBox.appendChild(receiverMessage);
+        }
+      };
+
+      chatSocket.onclose = function(e) {
+        console.error('Chat socket closed unexpectedly');
+      };
+
+      document.querySelector('#chat-message-input').focus();
+      document.querySelector('#chat-message-input').onkeyup = function(e) {
+        if (e.key === 'Enter') {  // enter, return
+          const messageInputDom = document.querySelector('#chat-message-input');
+          const message = messageInputDom.value.trim();
+          if (message !== ''){
+            document.querySelector('#chat-message-submit').click();
+          }
+        }
+      };
+
+      document.querySelector('#chat-message-submit').onclick = function(e) {
+        const messageInputDom = document.querySelector('#chat-message-input');
+        const message = messageInputDom.value;
+        chatSocket.send(JSON.stringify({
+          'message': message,
+          'username': username
+        }));
+        messageInputDom.value = '';
+      };
+    </script>
+
 </body>
 
 </html>

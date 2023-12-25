@@ -10,6 +10,7 @@
     <div class="row">
         <div class="col-md-12">
             What chat room would you like to enter?<br>
+            <button id="randomNameGen">Generate Random Name</button>
             <input id="room-name-input" type="text" size="100"><br>
             What username?<br>
             <input id="username-input" type="text" size="100"><br>
@@ -18,11 +19,25 @@
     </div>
 </div>
     <script>
+        function generateRandomString() {
+            var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            var randomString = '';
+            for (var i = 0; i < 8; i++) {
+                var randomIndex = Math.floor(Math.random() * chars.length);
+                randomString += chars.substring(randomIndex, randomIndex + 1);
+            }
+            return randomString;
+        }
+
         document.querySelector('#room-name-input').focus();
         document.querySelector('#room-name-input').onkeyup = function(e) {
             if (e.key === 'Enter') {  // enter, return
                 document.querySelector('#room-name-submit').click();
             }
+        };
+
+        document.querySelector('#randomNameGen').onclick = function(e) {
+            document.querySelector('#room-name-input').value = generateRandomString();
         };
 
         document.querySelector('#room-name-submit').onclick = function(e) {
